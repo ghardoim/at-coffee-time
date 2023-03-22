@@ -1,21 +1,13 @@
-from tkinter import Tk, Label, Button, Listbox, Scrollbar
-from tkinter import END
+from tkinter import Tk, END, Label, Button, Listbox, Scrollbar
 
 SIGNALS:list[str] = ["+", "-", "*", "/"]
-
 bsize:dict[str:int] = {"highlightthickness":1}
 bcolor:dict[str:str] = {"highlightbackground":"darkgray"}
 
 def is_odd(number:int) -> bool: return 0 != number % 2
-
-def has_signal(expression: str) -> bool:
-    return any(_ in expression and _ != expression[-1] for _ in SIGNALS)
-
-def replace(history_list:Listbox) -> None:
-    expression["text"] = history_list.get(history_list.curselection()).split("=")[0]
-
-def clear(expression:Label, click:bool=False) -> None:
-    expression["text"] = expression["text"][:-1] if not click else ""
+def has_signal(expression: str) -> bool: return any(_ in expression and _ != expression[-1] for _ in SIGNALS)
+def clear(expression:Label, click:bool=False) -> None: expression["text"] = expression["text"][:-1] if not click else ""
+def replace(history_list:Listbox) -> None: expression["text"] = history_list.get(history_list.curselection()).split("=")[0]
 
 def dot(*args, expression) -> None:
     if (expression["text"] and 1 > expression["text"].count(".")) or (has_signal(expression["text"]) and 2 > expression["text"].count(".")):
@@ -50,10 +42,10 @@ Label(main_label).grid(row=1)
 Label(main_label).grid(column=10, rowspan=10)
 
 Button(main_label, text="0", width=9, command=lambda: zero(expression=expression)).grid(row=9, column=1, columnspan=3)
-main.bind("0", func=lambda event: zero(expression=expression))
+main.bind("0", func=lambda _: zero(expression=expression))
 
 Button(main_label, text=".", width=3, command=lambda: dot(expression=expression)).grid(row=9, column=5)
-main.bind(".", func=lambda event: dot(expression=expression))
+main.bind(".", func=lambda _: dot(expression=expression))
 
 number:int = 0
 for row in range(8, 1, -1):
@@ -68,18 +60,16 @@ for row in range(8, 1, -1):
 
                 Button(main_label, width=3, text=number, command=nfunc).grid(row=row, column=column)
                 main.bind(number, func=nfunc)
-            else:
-                Label(main_label).grid(row=row, column=column, rowspan=10)
-    else:
-        Label(main_label).grid(row=row, columnspan=10)
+
+            else: Label(main_label).grid(row=row, column=column, rowspan=10)
+    else: Label(main_label).grid(row=row, columnspan=10)
 
 history_box:Label = Label(main)
+scroll = Scrollbar(history_box)
 history_box.config(highlightbackground="black", **bsize)
 
-scroll = Scrollbar(history_box)
-
 scroll_list = Listbox(history_box, justify="center", height=8, yscrollcommand=scroll.set, bg="gray96")
-scroll_list.bind("<Double-Button-1>", func=lambda event: replace(scroll_list))
+scroll_list.bind("<Double-Button-1>", func=lambda _: replace(scroll_list))
 scroll_list.grid(row=1, column=0)
 
 scroll.grid(row=1, column=1)
@@ -92,11 +82,11 @@ Button(history_box, text="C", command=lambda: scroll_list.delete(0, END)).grid(r
 Button(history_box, text="X", command=history_box.place_forget).grid(row=0, column=1, pady=3, padx=1)
 Label(history_box, text="expressions").grid(row=0, column=0, pady=3, padx=1)
 
-main.bind("<space>", func=lambda event: history_box.place(x=150, y=97, anchor="n"))
-main.bind("<Return>", func=lambda event: calculate(expression, scroll_list))
-main.bind("<Escape>", func=lambda event: history_box.place_forget())
-main.bind("<Delete>", func=lambda event: clear(expression, True))
-main.bind("<BackSpace>", func=lambda event: clear(expression))
+main.bind("<space>", func=lambda _: history_box.place(x=150, y=97, anchor="n"))
+main.bind("<Return>", func=lambda _: calculate(expression, scroll_list))
+main.bind("<Escape>", func=lambda _: history_box.place_forget())
+main.bind("<Delete>", func=lambda _: clear(expression, True))
+main.bind("<BackSpace>", func=lambda _: clear(expression))
 
 for s, signal in enumerate(SIGNALS):
     def sfunc(*args, signal:str=signal) -> None:
